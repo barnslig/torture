@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"log"
+	"sync"
 	"github.com/jlaffaye/ftp"
 )
 
@@ -13,8 +14,16 @@ type FTP struct {
 	conn *ftp.ServerConn
 }
 
-func (elem *FTP) crawlDirectory(dir string) {
-	list, err := elem.conn.List(dir)
+func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
+	var (
+		list []*ftp.Entry
+		err error
+	)
+	func() {
+		mt.Lock()
+		defer mt.Unlock()
+		list, err = elem.conn.List(dir)
+	}()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,16 +33,19 @@ func (elem *FTP) crawlDirectory(dir string) {
 
 		// go deeper!
 		if file.Type == ftp.EntryTypeFolder {
-			elem.crawlDirectory(ff)
+			elem.crawlDirectory(ff, mt)
 		}
 		// into teh elastics
 		if file.Type == ftp.EntryTypeFile {
-			fmt.Println(ff)
 		}
+
+		fmt.Println(ff)
 	}
 }
 
-func (elem *FTP) crawlFtpDirectories() {
+func (elem *FTP) crawlFtpDirectories(mt *sync.Mutex) {
 	pwd, _ := elem.conn.CurrentDir()
-	elem.crawlDirectory(pwd)
+	for {
+		elem.crawlDirectory(pwd, mt)
+	}
 }

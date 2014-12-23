@@ -44,6 +44,8 @@ func startFTPConnCycler() {
 			el.running = true
 			fmt.Println(el.url)
 
+			var mt = &sync.Mutex{}
+
 			// try to connect
 			for {
 				conn, err := ftp.Connect(el.url)
@@ -64,17 +66,20 @@ func startFTPConnCycler() {
 			}
 
 			// start a goroutine that sends a NoOp every 15 seconds
-			/*go func(conn *ftp.ServerConn) {
+			go func(conn *ftp.ServerConn) {
 				for {
 					time.Sleep(15 * time.Second)
 					fmt.Println("noop")
-					conn.NoOp()
+
+					func() {
+						mt.Lock()
+						defer mt.Unlock()
+						conn.NoOp()
+					}()
 				}
-			}(el.conn)*/
+			}(el.conn)
 
-			el.crawlFtpDirectories()
-
-			//wg.Done()
+			el.crawlFtpDirectories(mt)
 		}(elem)
 	}
 
