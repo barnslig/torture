@@ -13,6 +13,7 @@ import (
 
 var (
 	servers_file = flag.String("f", "servers.txt", "file with one ftp per line")
+	es_server = flag.String("es", "localhost", "ElasticSearch host")
 	servers []FTP
 )
 
@@ -87,6 +88,8 @@ func startFTPConnCycler() {
 
 func main() {
 	flag.Parse()
+
+	initElastics(*es_server)
 
 	loadFTPs()
 	startFTPConnCycler()

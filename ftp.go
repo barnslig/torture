@@ -37,6 +37,12 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 		}
 		// into teh elastics
 		if file.Type == ftp.EntryTypeFile {
+			fe := FileEntry{
+				elem.Url,
+				ff,
+				file.Size,
+			}
+			addToElastic(fe)
 		}
 
 		fmt.Println(ff)
