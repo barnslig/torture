@@ -9,9 +9,9 @@ import (
 )
 
 type FTP struct {
-	url string
-	running bool
-	conn *ftp.ServerConn
+	Url string
+	Running bool
+	Conn *ftp.ServerConn
 }
 
 func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
@@ -22,7 +22,7 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 	func() {
 		mt.Lock()
 		defer mt.Unlock()
-		list, err = elem.conn.List(dir)
+		list, err = elem.Conn.List(dir)
 	}()
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +44,7 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 }
 
 func (elem *FTP) crawlFtpDirectories(mt *sync.Mutex) {
-	pwd, _ := elem.conn.CurrentDir()
+	pwd, _ := elem.Conn.CurrentDir()
 	for {
 		elem.crawlDirectory(pwd, mt)
 	}

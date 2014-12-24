@@ -41,16 +41,15 @@ func startFTPConnCycler() {
 		wg.Add(1)
 
 		go func(el FTP) {
-			el.running = true
-			fmt.Println(el.url)
+			fmt.Println(el.Url)
 
 			var mt = &sync.Mutex{}
 
 			// try to connect
 			for {
-				conn, err := ftp.Connect(el.url)
+				conn, err := ftp.Connect(el.Url)
 				if err == nil {
-					el.conn = conn
+					el.Conn = conn
 					fmt.Println("connected!")
 					break
 				}
@@ -59,11 +58,11 @@ func startFTPConnCycler() {
 			}
 
 			// try to log in as anonymous
-			if el.conn.Login("anonymous", "anonymous") != nil {
+			if el.Conn.Login("anonymous", "anonymous") != nil {
 				fmt.Println("Login as anonymous failed.")
-				el.running = false
 				wg.Done()
 			}
+			el.Running = true
 
 			// start a goroutine that sends a NoOp every 15 seconds
 			go func(conn *ftp.ServerConn) {
@@ -77,7 +76,7 @@ func startFTPConnCycler() {
 						conn.NoOp()
 					}()
 				}
-			}(el.conn)
+			}(el.Conn)
 
 			el.crawlFtpDirectories(mt)
 		}(elem)
