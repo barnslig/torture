@@ -1,0 +1,13 @@
+{
+  "name": "torture",
+  "version": "0.0.0",
+  "homepage": "https://github.com/barnslig/torture",
+  "authors": [
+    "Leonard Techel <leonard@techel.net>"
+  ],
+  "dependencies": {
+    "mustache.js": "~0.8.2",
+    "bootstrap": "~3.3.1",
+    "filesize": "~2.0.4"
+  }
+}
