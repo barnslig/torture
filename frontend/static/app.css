@@ -1,0 +1,31 @@
+.stat {
+	margin-top: 15px;
+	margin-left: 40px;
+}
+
+#form-search input, #form-search button {
+	color: #41145a;
+	border-color: #6e50b4;
+}
+
+#form-search input {
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+#form-search button {
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	outline: none;
+}
+
+#search-results li a {
+	display: block;
+}
+#search-results li h3 {
+	color: #1a0dab;
+	font-size: 18px;
+	margin-bottom: 0;
+}
+#search-results li .link {
+	color: #006621;
+}
