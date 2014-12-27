@@ -29,3 +29,7 @@
 #search-results li .link {
 	color: #006621;
 }
+
+footer .pager li:nth-child(2) {
+	margin: 0 20px;
+}
