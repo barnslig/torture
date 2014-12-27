@@ -15,7 +15,7 @@ import (
 var (
 	servers_file = flag.String("f", "servers.txt", "file with one ftp per line")
 	es_server    = flag.String("es", "localhost", "ElasticSearch host")
-	servers      []FTP
+	servers      []*FTP
 )
 
 func loadFTPs() {
@@ -39,8 +39,8 @@ func loadFTPs() {
 	}
 }
 
-func scanServers() (servers []FTP, err error) {
-	var ftpServers []FTP
+func scanServers() (servers []*FTP, err error) {
+	var ftpServers []*FTP
 
 	file, err := os.Open(*servers_file)
 	if err != nil {
@@ -50,7 +50,7 @@ func scanServers() (servers []FTP, err error) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		ftp := FTP{
+		ftp := &FTP{
 			scanner.Text(),
 			false,
 			false,
@@ -83,7 +83,7 @@ func startFTPConnCycler() {
 		}
 
 		wg.Add(1)
-		go func(el FTP) {
+		go func(el *FTP) {
 			fmt.Println(el.Url)
 			var mt = &sync.Mutex{}
 
@@ -107,7 +107,7 @@ func startFTPConnCycler() {
 			el.Running = true
 
 			// start a goroutine that sends a NoOp every 15 seconds
-			go func(el FTP) {
+			go func(el *FTP) {
 				for !el.Obsolete {
 					time.Sleep(15 * time.Second)
 					fmt.Println("noop")
