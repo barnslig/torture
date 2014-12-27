@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	elastigo "github.com/barnslig/elastigo/lib"
 	"github.com/dustin/go-humanize"
 	"gopkg.in/flosch/pongo2.v3"
@@ -58,20 +57,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	q := r.FormValue("q")
 	p, _ := strconv.Atoi(r.FormValue("p"))
 
-	searchJson := fmt.Sprintf(`{
-		"query": {
-			"match": {
-				"Path": {
-					"query": "%s",
-					"fuzziness": 1
-				}
-			}
-		}
-	}`, q)
+	searchQ := hash{
+		"query": hash{
+			"match": hash{
+				"Path": hash{
+					"query":     q,
+					"fuzziness": 1,
+				},
+			},
+		},
+	}
 	query_response, err := es_conn.Search("torture", "file", hash{
 		"size": *per_page,
 		"from": *per_page * p,
-	}, searchJson)
+	}, searchQ)
 	if err != nil {
 		log.Print(err)
 	}
