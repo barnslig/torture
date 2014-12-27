@@ -30,7 +30,7 @@ header h1 img {
 	font-size: 18px;
 	margin-bottom: 0;
 }
-#search-results li .link {
+#search-results li .link a {
 	color: #006621;
 }
 

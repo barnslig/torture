@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -23,9 +22,13 @@ var (
 	tmpls       = make(map[string]*pongo2.Template)
 )
 
+type Server struct {
+	Url  string
+	Path string
+}
+
 type Result struct {
-	Server    string
-	Path      string
+	Servers   []Server
 	Filename  string
 	Size      uint64
 	HumanSize string
@@ -87,9 +90,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		raw, _ := qr.Source.MarshalJSON()
 		json.Unmarshal(raw, &result)
 
-		// get the plain filename
-		path_splitted := strings.Split(result.Path, "/")
-		result.Filename = path_splitted[len(path_splitted)-1]
 		result.HumanSize = humanize.Bytes(result.Size)
 
 		results = append(results, result)

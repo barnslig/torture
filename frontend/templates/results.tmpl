@@ -25,10 +25,15 @@
 
 		{% for result in results %}
 			<li>
-				<a href="ftp://{{result.Server}}{{result.Path}}">
+				<a href="ftp://{{result.Servers.0.Url}}{{result.Servers.0.Path}}">
 					<h3>{{ result.Filename }} <small>{{ result.HumanSize }}</small></h3>
-					<p class="link">{{result.Server}}{{result.Path}}</p>
 				</a>
+				On the following servers:
+				<ul>
+					{% for server in result.Servers %}
+						<li class="link"><a href="ftp://{{server.Url}}{{server.Path}}">{{server.Url}}{{server.Path}}</a></li>
+					{% endfor %}
+				</ul>
 			</li>
 		{% endfor %}
 	</ol>

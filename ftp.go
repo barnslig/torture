@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/jlaffaye/ftp"
-	"log"
 	"path"
+	"path/filepath"
 	"sync"
 )
 
@@ -18,18 +18,12 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 	if elem.Obsolete {
 		return
 	}
-	var (
-		list []*ftp.Entry
-		err  error
-	)
+	var list []*ftp.Entry
 	func() {
 		mt.Lock()
 		defer mt.Unlock()
-		list, err = elem.Conn.List(dir)
+		list, _ = elem.Conn.List(dir)
 	}()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	for _, file := range list {
 		ff := path.Join(dir, file.Name)
@@ -40,10 +34,16 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 		}
 		// into teh elastics
 		if file.Type == ftp.EntryTypeFile {
+			var fservers []FtpEntry
+			fservers = append(fservers, FtpEntry{
+				Url:  elem.Url,
+				Path: ff,
+			})
+
 			fe := FileEntry{
-				elem.Url,
-				ff,
-				file.Size,
+				Servers:  fservers,
+				Filename: filepath.Base(ff),
+				Size:     file.Size,
 			}
 			addToElastic(fe)
 		}

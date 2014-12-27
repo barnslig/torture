@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	elastigo "github.com/barnslig/elastigo/lib"
 	"log"
 )
@@ -9,11 +10,18 @@ var (
 	es_conn *elastigo.Conn
 )
 
-type FileEntry struct {
-	Server string
-	Path   string
-	Size   uint64
+type FtpEntry struct {
+	Url  string
+	Path string
 }
+
+type FileEntry struct {
+	Filename string
+	Size     uint64
+	Servers  []FtpEntry
+}
+
+type hash map[string]interface{}
 
 func initElastics(host string) {
 	es_conn = elastigo.NewConn()
@@ -27,6 +35,12 @@ func initElastics(host string) {
 			Enabled: true,
 			Store:   true,
 		},
+		Properties: hash{
+			"Filename": hash{
+				"type":  "string",
+				"index": "not_analyzed",
+			},
+		},
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -34,8 +48,41 @@ func initElastics(host string) {
 }
 
 func addToElastic(file FileEntry) {
-	_, err := es_conn.Index("torture", "file", "", nil, file)
+	// look up the file by the name
+	searchJson := fmt.Sprintf(`{
+		"query": {
+			"filtered": {
+				"filter": {
+					"term": {
+						"Filename": "%s"
+					}
+				}
+			}
+		}
+	}`, file.Filename)
+	query_response, err := es_conn.Search("torture", "file", nil, searchJson)
 	if err != nil {
 		log.Print(err)
+		return
+	}
+	if query_response.Hits.Len() > 0 {
+		log.Println(query_response.Hits.Hits[0].Id)
+		_, err := es_conn.Update("torture", "file", query_response.Hits.Hits[0].Id, nil, hash{
+			"script": "ctx._source.Servers += Server",
+			"params": hash{
+				"Server": hash{
+					"Url":  file.Servers[0].Url,
+					"Path": file.Servers[0].Path,
+				},
+			},
+		})
+		if err != nil {
+			log.Print(err)
+		}
+	} else {
+		_, err := es_conn.Index("torture", "file", "", nil, file)
+		if err != nil {
+			log.Print(err)
+		}
 	}
 }
