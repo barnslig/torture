@@ -53,13 +53,20 @@ func addToElastic(file FileEntry) {
 		"query": {
 			"filtered": {
 				"filter": {
-					"term": {
-						"Filename": "%s"
+					"bool": {
+						"must": [
+							{"term": {
+								"Filename": "%s"
+							}},
+							{"term": {
+								"Size": %d
+							}}
+						]
 					}
 				}
 			}
 		}
-	}`, file.Filename)
+	}`, file.Filename, file.Size)
 	query_response, err := es_conn.Search("torture", "file", nil, searchJson)
 	if err != nil {
 		log.Print(err)
@@ -67,8 +74,9 @@ func addToElastic(file FileEntry) {
 	}
 	if query_response.Hits.Len() > 0 {
 		log.Println(query_response.Hits.Hits[0].Id)
+
 		_, err := es_conn.Update("torture", "file", query_response.Hits.Hits[0].Id, nil, hash{
-			"script": "ctx._source.Servers += Server",
+			"script": "ctx._source.Servers.contains(Server) ? (ctx.op = \"none\") : (ctx._source.Servers += Server)",
 			"params": hash{
 				"Server": hash{
 					"Url":  file.Servers[0].Url,
