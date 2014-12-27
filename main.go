@@ -27,8 +27,9 @@ func loadFTPs() {
 	newServers, _ := scanServers()
 	for _, oldServer := range servers {
 		var isIncluded bool
-		for _, newServer := range newServers {
+		for i, newServer := range newServers {
 			if oldServer.Url == newServer.Url {
+				newServers[i] = oldServer
 				isIncluded = true
 			}
 		}
@@ -37,11 +38,11 @@ func loadFTPs() {
 			oldServer.Obsolete = true
 		}
 	}
+
+	servers = newServers
 }
 
-func scanServers() (servers []*FTP, err error) {
-	var ftpServers []*FTP
-
+func scanServers() (ftpServers []*FTP, err error) {
 	file, err := os.Open(*servers_file)
 	if err != nil {
 		return
@@ -57,7 +58,7 @@ func scanServers() (servers []*FTP, err error) {
 			nil,
 		}
 
-		servers = append(ftpServers, ftp)
+		ftpServers = append(ftpServers, ftp)
 	}
 
 	return
@@ -79,12 +80,13 @@ func startFTPConnCycler() {
 
 	for _, elem := range servers {
 		if elem.Running {
-			break
+			continue
 		}
 
 		wg.Add(1)
 		go func(el *FTP) {
-			fmt.Println(el.Url)
+			el.Running = true
+
 			var mt = &sync.Mutex{}
 
 			// try to connect
@@ -92,25 +94,24 @@ func startFTPConnCycler() {
 				conn, err := ftp.Connect(el.Url)
 				if err == nil {
 					el.Conn = conn
-					fmt.Println("connected!")
+					fmt.Println("connected", el.Url)
 					break
 				}
-				fmt.Println("retry …")
+				fmt.Println("retry ", el.Url)
 				time.Sleep(2 * time.Second)
 			}
 
 			// try to log in as anonymous
 			if el.Conn.Login("anonymous", "anonymous") != nil {
-				fmt.Println("Login as anonymous failed.")
+				fmt.Println("Login as anonymous failed", el.Url)
 				wg.Done()
 			}
-			el.Running = true
 
 			// start a goroutine that sends a NoOp every 15 seconds
 			go func(el *FTP) {
 				for !el.Obsolete {
 					time.Sleep(15 * time.Second)
-					fmt.Println("noop")
+					fmt.Println("noop", el.Url)
 
 					func() {
 						mt.Lock()
