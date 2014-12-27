@@ -88,7 +88,7 @@ func startFTPConnCycler() {
 			var mt = &sync.Mutex{}
 
 			// try to connect
-			for {
+			for !el.Obsolete {
 				conn, err := ftp.Connect(el.Url)
 				if err == nil {
 					el.Conn = conn
