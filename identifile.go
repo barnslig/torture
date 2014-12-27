@@ -1,7 +1,7 @@
 package main
 
 import (
-	elastigo "github.com/mattbaird/elastigo/lib"
+	elastigo "github.com/barnslig/elastigo/lib"
 	"log"
 )
 
