@@ -44,7 +44,7 @@
 		<nav>
 			<ul class="pager">
 				<li {% if page == 0 %}class="disabled"{% endif %}><a href="{{prevpage}}">Previous</a></li>
-				<li>{{page+1}}</li>
+				<li>{{page+1}} / {{maxpages+1}}</li>
 				<li {% if page == maxpages %}class="disabled"{% endif %}><a href="{{nextpage}}">Next</a></li>
 			</ul>
 		</nav>
