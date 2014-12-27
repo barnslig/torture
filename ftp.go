@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/jlaffaye/ftp"
 	"log"
 	"path"
@@ -48,8 +47,6 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 			}
 			addToElastic(fe)
 		}
-
-		fmt.Println(ff)
 	}
 }
 

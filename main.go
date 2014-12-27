@@ -118,10 +118,12 @@ func startFTPConnCycler() {
 						el.Conn.NoOp()
 					}()
 				}
+				fmt.Println("closed", el.Url)
 			}(el)
 
 			el.crawlFtpDirectories(mt)
 			el.Conn.Quit()
+			fmt.Println("closed", el.Url)
 		}(elem)
 	}
 
