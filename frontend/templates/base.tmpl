@@ -6,12 +6,10 @@
 		<meta name="theme-color" content="#41145a" />
 		<title>Find Your File</title>
 
-		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="app.css" />
-		<script src="/bower_components/jquery/dist/jquery.min.js"></script>
-		<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-		<script src="/bower_components/mustache.js/mustache.js"></script>
-		<script src="/bower_components/filesize/lib/filesize.min.js"></script>
+		<link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/static/app.css" />
+		<script src="/static/bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="/static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
 		{% block head %}
 		{% endblock %}
@@ -21,7 +19,7 @@
 			<div class="row">
 				<div class="col-md-9 col-md-offset-1">
 					<header>
-						<h1>Find Your File</h1>
+						<h1><img src="/static/logo.png" /> Find Your File</h1>
 					</header>
 					<article>
 						{% block article %}

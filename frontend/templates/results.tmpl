@@ -3,7 +3,7 @@
 {% block article %}
 	<form action="/s" mode="GET" id="form-search">
 		<div class="input-group input-group-lg">
-			<input type="search" name="q" class="form-control" autocomplete="off" value="{{ query }}" />
+			<input type="search" name="q" class="form-control" autocomplete="off" value="{{ query }}" autofocus="autofocus" />
 			<span class="input-group-btn">
 				<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-search"></i> Search</button>
 			</span>
@@ -15,8 +15,12 @@
 	{% endif %}
 
 	<ol id="search-results" start="{{frompage + 1}}">
-		{% if !results %}
+		{% if !results and query %}
 			<p class="stat">No results</p>
+		{% endif %}
+
+		{% if !query %}
+			<p class="stat">Enter a query …!</p>
 		{% endif %}
 
 		{% for result in results %}
@@ -31,11 +35,13 @@
 {% endblock %}
 
 {% block footer %}
-	<nav>
-		<ul class="pager">
-			<li {% if page == 0 %}class="disabled"{% endif %}><a href="{{prevpage}}">Previous</a></li>
-			<li>{{page+1}}</li>
-			<li {% if page == maxpages %}class="disabled"{% endif %}><a href="{{nextpage}}">Next</a></li>
-		</ul>
-	</nav>
+	{% if results %}
+		<nav>
+			<ul class="pager">
+				<li {% if page == 0 %}class="disabled"{% endif %}><a href="{{prevpage}}">Previous</a></li>
+				<li>{{page+1}}</li>
+				<li {% if page == maxpages %}class="disabled"{% endif %}><a href="{{nextpage}}">Next</a></li>
+			</ul>
+		</nav>
+	{% endif %}
 {% endblock %}
