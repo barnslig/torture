@@ -1,20 +1,22 @@
 package main
 
 import (
-	"flag"
-	"os"
 	"bufio"
-	"log"
+	"flag"
 	"fmt"
-	"sync"
-	"time"
 	"github.com/jlaffaye/ftp"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
 )
 
 var (
 	servers_file = flag.String("f", "servers.txt", "file with one ftp per line")
-	es_server = flag.String("es", "localhost", "ElasticSearch host")
-	servers []FTP
+	es_server    = flag.String("es", "localhost", "ElasticSearch host")
+	servers      []FTP
 )
 
 func loadFTPs() {
@@ -33,6 +35,17 @@ func loadFTPs() {
 		}
 		servers = append(servers, ftp)
 	}
+}
+
+func initReloading(sig os.Signal) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, sig)
+	go func() {
+		<-c
+
+		loadFTPs()
+		startFTPConnCycler()
+	}()
 }
 
 func startFTPConnCycler() {
@@ -90,7 +103,7 @@ func main() {
 	flag.Parse()
 
 	initElastics(*es_server)
-
 	loadFTPs()
+	initReloading(syscall.SIGUSR1)
 	startFTPConnCycler()
 }
