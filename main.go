@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/jlaffaye/ftp"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -59,6 +61,17 @@ func scanServers() (servers []FTP, err error) {
 	}
 
 	return
+}
+
+func initReloading(sig os.Signal) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, sig)
+	go func() {
+		<-c
+
+		loadFTPs()
+		startFTPConnCycler()
+	}()
 }
 
 func startFTPConnCycler() {
@@ -119,7 +132,7 @@ func main() {
 	flag.Parse()
 
 	initElastics(*es_server)
-
 	loadFTPs()
+	initReloading(syscall.SIGUSR1)
 	startFTPConnCycler()
 }
