@@ -1,26 +1,48 @@
 package main
 
 import (
-	"flag"
-	"os"
 	"bufio"
-	"log"
+	"flag"
 	"fmt"
+	"github.com/jlaffaye/ftp"
+	"os"
 	"sync"
 	"time"
-	"github.com/jlaffaye/ftp"
 )
 
 var (
 	servers_file = flag.String("f", "servers.txt", "file with one ftp per line")
-	es_server = flag.String("es", "localhost", "ElasticSearch host")
-	servers []FTP
+	es_server    = flag.String("es", "localhost", "ElasticSearch host")
+	servers      []FTP
 )
 
 func loadFTPs() {
+	if len(servers) <= 0 {
+		servers, _ = scanServers()
+		return
+	}
+
+	newServers, _ := scanServers()
+	for _, oldServer := range servers {
+		var isIncluded bool
+		for _, newServer := range newServers {
+			if oldServer.Url == newServer.Url {
+				isIncluded = true
+			}
+		}
+
+		if !isIncluded {
+			oldServer.Obsolete = true
+		}
+	}
+}
+
+func scanServers() (servers []FTP, err error) {
+	var ftpServers []FTP
+
 	file, err := os.Open(*servers_file)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	defer file.Close()
 
@@ -29,21 +51,27 @@ func loadFTPs() {
 		ftp := FTP{
 			scanner.Text(),
 			false,
+			false,
 			nil,
 		}
-		servers = append(servers, ftp)
+
+		servers = append(ftpServers, ftp)
 	}
+
+	return
 }
 
 func startFTPConnCycler() {
 	var wg sync.WaitGroup
 
 	for _, elem := range servers {
-		wg.Add(1)
+		if elem.Running {
+			break
+		}
 
+		wg.Add(1)
 		go func(el FTP) {
 			fmt.Println(el.Url)
-
 			var mt = &sync.Mutex{}
 
 			// try to connect
@@ -66,20 +94,21 @@ func startFTPConnCycler() {
 			el.Running = true
 
 			// start a goroutine that sends a NoOp every 15 seconds
-			go func(conn *ftp.ServerConn) {
-				for {
+			go func(el FTP) {
+				for !el.Obsolete {
 					time.Sleep(15 * time.Second)
 					fmt.Println("noop")
 
 					func() {
 						mt.Lock()
 						defer mt.Unlock()
-						conn.NoOp()
+						el.Conn.NoOp()
 					}()
 				}
-			}(el.Conn)
+			}(el)
 
 			el.crawlFtpDirectories(mt)
+			el.Conn.Quit()
 		}(elem)
 	}
 

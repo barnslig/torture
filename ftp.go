@@ -2,22 +2,26 @@ package main
 
 import (
 	"fmt"
-	"path"
-	"log"
-	"sync"
 	"github.com/jlaffaye/ftp"
+	"log"
+	"path"
+	"sync"
 )
 
 type FTP struct {
-	Url string
-	Running bool
-	Conn *ftp.ServerConn
+	Url      string
+	Running  bool
+	Obsolete bool
+	Conn     *ftp.ServerConn
 }
 
 func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
+	if elem.Obsolete {
+		return
+	}
 	var (
 		list []*ftp.Entry
-		err error
+		err  error
 	)
 	func() {
 		mt.Lock()
@@ -51,7 +55,7 @@ func (elem *FTP) crawlDirectory(dir string, mt *sync.Mutex) {
 
 func (elem *FTP) crawlFtpDirectories(mt *sync.Mutex) {
 	pwd, _ := elem.Conn.CurrentDir()
-	for {
+	for !elem.Obsolete {
 		elem.crawlDirectory(pwd, mt)
 	}
 }

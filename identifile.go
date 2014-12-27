@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	elastigo "github.com/mattbaird/elastigo/lib"
+	"log"
 )
 
 var (
@@ -11,8 +11,8 @@ var (
 
 type FileEntry struct {
 	Server string
-	Path string
-	Size uint64
+	Path   string
+	Size   uint64
 }
 
 func initElastics(host string) {
@@ -25,7 +25,7 @@ func initElastics(host string) {
 	err := es_conn.PutMapping("torture", "file", FileEntry{}, elastigo.MappingOptions{
 		Timestamp: elastigo.TimestampOptions{
 			Enabled: true,
-			Store: true,
+			Store:   true,
 		},
 	})
 	if err != nil {
