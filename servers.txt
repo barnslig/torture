@@ -1,2 +1,0 @@
-ftp.gnu.org:21
-ftp.mozilla.org:21
