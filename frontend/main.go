@@ -126,7 +126,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpls["results"].ExecuteWriter(pongo2.Context{
-		"query":    query,
+		"query": query,
 
 		"page":     page,
 		"frompage": *per_page * page,
