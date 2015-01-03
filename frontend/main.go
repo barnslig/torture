@@ -148,11 +148,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/s", handler)
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	mux.Handle("/", http.RedirectHandler("/s", 301))
-
-	http.ListenAndServe(*http_listen, mux)
+	http.HandleFunc("/s", handler)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/", http.RedirectHandler("/s", 301))
+	log.Fatal(http.ListenAndServe(*http_listen, nil))
 }
