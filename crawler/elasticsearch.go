@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	elastigo "github.com/barnslig/elastigo/lib"
 )
 
@@ -52,26 +51,29 @@ func (es *ElasticSearch) CreateMappingAndIndex() (err error) {
 
 // Look up a FileEntry by filename and size and
 func (es *ElasticSearch) GetFileEntry(file FileEntry) (entry *elastigo.Hit, err error) {
-	searchJson := fmt.Sprintf(`{
-		"query": {
-			"filtered": {
-				"filter": {
-					"bool": {
-						"must": [
-							{"term": {
-								"Filename": "%s"
-							}},
-							{"term": {
-								"Size": %d
-							}}
-						]
-					}
-				}
-			}
-		}
-	}`, file.Filename, file.Size)
-
-	response, err := es.Conn.Search("torture", "file", nil, searchJson)
+	searchQ := hash{
+		"query": hash{
+			"filtered": hash{
+				"filter": hash{
+					"bool": hash{
+						"must": []hash{
+							hash{
+								"term": hash{
+									"Filename": file.Filename,
+								},
+							},
+							hash{
+								"term": hash{
+									"Size": file.Size,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	response, err := es.Conn.Search("torture", "file", nil, searchQ)
 	if err != nil {
 		return
 	}
