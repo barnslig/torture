@@ -31,7 +31,10 @@ func CreateElasticSearch(host string, cr *Crawler) (es *ElasticSearch, err error
 }
 
 func (es *ElasticSearch) CreateMappingAndIndex() (err error) {
-	es.Conn.CreateIndex("torture")
+	_, err = es.Conn.CreateIndex("torture")
+	if err != nil {
+		return
+	}
 
 	// enable timestamps + do not analyze Filenames so we can do exact matches
 	err = es.Conn.PutMapping("torture", "file", FileEntry{}, elastigo.MappingOptions{
@@ -46,6 +49,7 @@ func (es *ElasticSearch) CreateMappingAndIndex() (err error) {
 			},
 		},
 	})
+
 	return
 }
 

@@ -53,9 +53,20 @@ func getPageLink(page int, url *url.URL) string {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err, ok := recover().(error); ok {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}()
+
 	start := time.Now()
 	q := r.FormValue("q")
-	p, _ := strconv.Atoi(r.FormValue("p"))
+
+	p, err := strconv.Atoi(r.FormValue("p"))
+	if err != nil {
+		panic(err)
+	}
 
 	searchQ := hash{
 		"query": hash{
@@ -72,25 +83,39 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		"from": *per_page * p,
 	}, searchQ)
 	if err != nil {
-		log.Print(err)
+		panic(err)
 	}
 
 	// API like a bauss
 	if r.FormValue("f") == "json" {
-		output, _ := json.Marshal(query_response.Hits)
+		output, err := json.Marshal(query_response.Hits)
+		if err != nil {
+			panic(err)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(output)
+		_, err = w.Write(output)
+		if err != nil {
+			panic(err)
+		}
+
 		return
 	}
 
 	var results []Result
 	for _, qr := range query_response.Hits.Hits {
+		raw, err := qr.Source.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+
 		var result Result
-		raw, _ := qr.Source.MarshalJSON()
-		json.Unmarshal(raw, &result)
+		err = json.Unmarshal(raw, &result)
+		if err != nil {
+			panic(err)
+		}
 
 		result.HumanSize = humanize.Bytes(result.Size)
-
 		results = append(results, result)
 	}
 
@@ -111,7 +136,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
-
 	initElastics(*es_server)
 
 	// load templates

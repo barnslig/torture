@@ -29,12 +29,17 @@ func CreateCrawler(cfg Config) (cr *Crawler, err error) {
 	// Create logger
 	cr.Log = log.New(cr.cfg.LogOutput, "crawler: ", log.Ldate|log.Lshortfile)
 
-	// Create an ElasticSearch connection + Create index and mapping
+	// Create an ElasticSearch connection
 	cr.elasticSearch, err = CreateElasticSearch(cr.cfg.ElasticServer, cr)
 	if err != nil {
 		return
 	}
-	cr.elasticSearch.CreateMappingAndIndex()
+
+	// Create index and mapping
+	err = cr.elasticSearch.CreateMappingAndIndex()
+	if err != nil {
+		return
+	}
 
 	// Start listening for the USR1 syscall to reload the FTP servers
 	cr.InitReloadingFtps(syscall.SIGUSR1)
