@@ -52,7 +52,28 @@ func getPageLink(page int, url *url.URL) string {
 	return purl.String()
 }
 
+func search(query string, page int) (resp elastigo.SearchResult, err error) {
+	searchQ := hash{
+		"query": hash{
+			"match": hash{
+				"Path": hash{
+					"query":     query,
+					"fuzziness": 1,
+				},
+			},
+		},
+	}
+
+	resp, err = es_conn.Search("torture", "file", hash{
+		"size": *per_page,
+		"from": *per_page * page,
+	}, searchQ)
+
+	return
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	defer func() {
 		if err, ok := recover().(error); ok {
 			log.Println(err)
@@ -60,35 +81,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	start := time.Now()
-	q := r.FormValue("q")
-
-	p, err := strconv.Atoi(r.FormValue("p"))
+	query := r.FormValue("q")
+	page, err := strconv.Atoi(r.FormValue("p"))
 	if err != nil {
 		panic(err)
 	}
 
-	searchQ := hash{
-		"query": hash{
-			"match": hash{
-				"Path": hash{
-					"query":     q,
-					"fuzziness": 1,
-				},
-			},
-		},
-	}
-	query_response, err := es_conn.Search("torture", "file", hash{
-		"size": *per_page,
-		"from": *per_page * p,
-	}, searchQ)
+	resp, err := search(query, page)
 	if err != nil {
 		panic(err)
 	}
 
 	// API like a bauss
 	if r.FormValue("f") == "json" {
-		output, err := json.Marshal(query_response.Hits)
+		output, err := json.Marshal(resp.Hits)
 		if err != nil {
 			panic(err)
 		}
@@ -103,7 +109,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var results []Result
-	for _, qr := range query_response.Hits.Hits {
+	for _, qr := range resp.Hits.Hits {
 		raw, err := qr.Source.MarshalJSON()
 		if err != nil {
 			panic(err)
@@ -120,16 +126,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpls["results"].ExecuteWriter(pongo2.Context{
-		"query": q,
+		"query":    query,
 
-		"page":     p,
-		"frompage": *per_page * p,
-		"maxpages": query_response.Hits.Total / *per_page,
-		"prevpage": getPageLink(p-1, r.URL),
-		"nextpage": getPageLink(p+1, r.URL),
+		"page":     page,
+		"frompage": *per_page * page,
+		"maxpages": resp.Hits.Total / *per_page,
+		"prevpage": getPageLink(page-1, r.URL),
+		"nextpage": getPageLink(page+1, r.URL),
 
 		"elapsed":  time.Since(start) / time.Millisecond,
-		"response": query_response,
+		"response": resp,
 		"results":  results,
 	}, w)
 }
