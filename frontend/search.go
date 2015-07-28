@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/dustin/go-humanize"
-	"gopkg.in/flosch/pongo2.v3"
+	"github.com/flosch/pongo2"
 	"log"
 	"net/http"
 	"net/url"

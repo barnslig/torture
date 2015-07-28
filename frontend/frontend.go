@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gopkg.in/flosch/pongo2.v3"
+	"github.com/flosch/pongo2"
 	"io"
 	"log"
 	"net/http"

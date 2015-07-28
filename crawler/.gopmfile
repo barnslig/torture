@@ -1,0 +1,9 @@
+[target]
+path = github.com/barnslig/torture/crawler
+
+[deps]
+github.com/barnslig/elastigo = commit:31d0ecfddb9fa76400cd65cc649348cff466eec3
+github.com/jlaffaye/ftp = commit:80fcd9720b2b103c71aa8b7b36a04348080cad8b
+
+[res]
+include = 
