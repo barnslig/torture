@@ -5,6 +5,7 @@ path = github.com/barnslig/torture/frontend
 github.com/barnslig/elastigo = commit:31d0ecfddb9fa76400cd65cc649348cff466eec3
 github.com/dustin/go-humanize = commit:b198514c204f20799b91c93b6ffd8b26be04c2c9
 github.com/flosch/pongo2 = tag:v3
+github.com/julienschmidt/httprouter = tag:v1.1
 
 [res]
 include = templates|static

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -44,7 +45,7 @@ func CreateSearch(cfg SearchConfig) (search *Search, err error) {
 	return
 }
 
-func (search *Search) Handler(w http.ResponseWriter, r *http.Request) {
+func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	start := time.Now()
 
 	// Catch errors in the following code, log them and return a HTTP 500

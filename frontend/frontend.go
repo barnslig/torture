@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/flosch/pongo2"
+	"github.com/julienschmidt/httprouter"
 	"io"
 	"log"
 	"net/http"
@@ -46,10 +47,10 @@ func CreateFrontend(cfg FrontendConfig) (frontend *Frontend, err error) {
 		return
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/s", search.Handler)
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	mux.Handle("/", http.RedirectHandler("/s", 301))
+	mux := httprouter.New()
+	mux.Handle("GET", "/s", search.Handler)
+	mux.Handler("GET", "/", http.RedirectHandler("/s", 301))
+	mux.ServeFiles("/static/*filepath", http.Dir("static"))
 
 	log.Fatal(http.ListenAndServe(frontend.cfg.HttpListen, mux))
 
