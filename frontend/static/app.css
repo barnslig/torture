@@ -52,3 +52,7 @@ header h1 img {
 footer .pager li:nth-child(2) {
 	margin: 0 20px;
 }
+
+.alert > .glyphicon {
+	margin-right: 5px;
+}

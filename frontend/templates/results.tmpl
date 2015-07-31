@@ -21,7 +21,7 @@
 				<input type="checkbox" name="f" value="small" {% if filters.SmallFiles %}checked="checked"{% endif %} />
 				Filter files smaller than 100B
 
-				<i class="glyphicon glyphicon-info-sign" data-toggle="popover" data-placement="bottom" data-trigger="hover" data-html="true" data-content="Files smaller than 100B are likely to be irrelevant meta information like .nfo files."></i>
+				<i class="glyphicon glyphicon-question-sign" data-toggle="popover" data-placement="bottom" data-trigger="hover" data-html="true" data-content="Files smaller than 100B are likely to be irrelevant meta information like .nfo files."></i>
 			</label>
 		</div>
 	</form>
@@ -30,15 +30,15 @@
 		<p class="stat">{{ response.Hits.Total }} results in {{ elapsed }}ms</p>
 	{% endif %}
 
+	{% if !results and query %}
+		<div class="alert alert-info" role="alert"><i class="glyphicon glyphicon glyphicon-info-sign" aria-hidden="true"></i> No results</div>
+	{% endif %}
+
+	{% if !query %}
+		<div class="alert alert-info" role="alert"><i class="glyphicon glyphicon-info-sign" aria-hidden="true"></i> Enter a query …!</div>
+	{% endif %}
+
 	<ol id="search-results" start="{{frompage + 1}}">
-		{% if !results and query %}
-			<p class="stat">No results</p>
-		{% endif %}
-
-		{% if !query %}
-			<p class="stat">Enter a query …!</p>
-		{% endif %}
-
 		{% for result in results %}
 			<li>
 				<a href="ftp://{{result.Servers.0.Url}}{{result.Servers.0.Path}}">
