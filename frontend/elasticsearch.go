@@ -21,39 +21,30 @@ func CreateElasticSearch(host string) (es *ElasticSearch, err error) {
 
 func (es *ElasticSearch) Search(query string, filters Filter, perPage int, page int) (resp elastigo.SearchResult, err error) {
 	matchQ := hash{
-		"Path": hash{
-			"query":     query,
-			"fuzziness": 1,
+		"match": hash{
+			"Path": hash{
+				"query":     query,
+				"fuzziness": 1,
+			},
 		},
 	}
+
+	filterQ := make(hash)
 
 	searchQ := hash{
 		"query": hash{
-			"match": matchQ,
+			"filtered": hash{
+				"query":  matchQ,
+				"filter": filterQ,
+			},
 		},
 	}
-
-	// Apply filters
-	filterQ := make(hash)
 
 	// Filter: Files smaller than 100B
 	if filters.SmallFiles {
 		filterQ["range"] = hash{
 			"Size": hash{
 				"gte": 100,
-			},
-		}
-	}
-
-	if filters.IsUnfiltered() {
-		searchQ = hash{
-			"query": hash{
-				"filtered": hash{
-					"query": hash{
-						"match": matchQ,
-					},
-					"filter": filterQ,
-				},
 			},
 		}
 	}

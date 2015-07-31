@@ -14,7 +14,9 @@ func CreateFilter() (filter *Filter) {
 	return
 }
 
-func (filter *Filter) IsUnfiltered() bool {
+// Tells if any filter is set
+// Currently boilerplate. To be used later, maybe!
+func (filter *Filter) IsFiltered() bool {
 	v := reflect.ValueOf(*filter)
 
 	for i := 0; i < v.NumField(); i++ {
@@ -26,6 +28,7 @@ func (filter *Filter) IsUnfiltered() bool {
 	return false
 }
 
+// Parses a slice of strings, e.g. []string{"small", "nsfw"} into a Filter struct
 func (filter *Filter) UnmarshalStringSlice(input []string) {
 	for _, el := range input {
 		switch el {
