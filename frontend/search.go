@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
 	"github.com/julienschmidt/httprouter"
@@ -50,9 +49,9 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 
 	// Catch errors in the following code, log them and return a HTTP 500
 	defer func() {
-		if err := recover(); err != nil {
+		if err, ok := recover().(error); ok {
 			search.cfg.Frontend.Log.Println(err)
-			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}()
 
