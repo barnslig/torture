@@ -2,12 +2,12 @@ header h1 img {
 	margin-top: -15px;
 }
 
-.stat {
+.stat, #form-search .checkbox {
 	margin-top: 15px;
 	margin-left: 40px;
 }
 
-#form-search input, #form-search button {
+#form-search input, #form-search button[type="submit"] {
 	color: #3F5700;
 	border-color: #728a30;
 }
@@ -16,10 +16,25 @@ header h1 img {
 	border-top-left-radius: 3px;
 	border-bottom-left-radius: 3px;
 }
-#form-search button {
+#form-search button[type="submit"] {
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	outline: none;
+}
+
+#form-search .checkbox h5, #form-search .checkbox label {
+	display: inline-block;
+	margin-right: 30px;
+}
+#form-search .checkbox i {
+	margin-left: 3px;
+	color: #777;
+}
+
+@media screen and (max-width: 768px) {
+	#form-search .checkbox label {
+		display: block;
+	}
 }
 
 #search-results li a {

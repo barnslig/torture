@@ -58,18 +58,23 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 
 	/* Parse GET parameters
 	 * q: Search query
-	 * f: Format. Default is HTML, currently supported options: "json"
 	 * p: Current page. Is zero if not a number
+	 * f: Filter. Can be used multiple times
+	 * format: Format. Default is HTML, currently supported options: "json"
 	 */
 	query := r.FormValue("q")
-	format := r.FormValue("f")
+	format := r.FormValue("format")
 	page, err := strconv.Atoi(r.FormValue("p"))
 	if err != nil {
 		page = 0
 	}
 
+	r.ParseForm()
+	filters := CreateFilter()
+	filters.UnmarshalStringSlice(r.Form["f"])
+
 	// Do the actual search
-	resp, err := search.cfg.Frontend.elasticSearch.Search(query, search.cfg.Frontend.cfg.PerPage, page)
+	resp, err := search.cfg.Frontend.elasticSearch.Search(query, *filters, search.cfg.Frontend.cfg.PerPage, page)
 	if err != nil {
 		search.cfg.Frontend.Log.Panic(err)
 	}
@@ -106,7 +111,8 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 	}
 
 	search.tmpl.ExecuteWriter(pongo2.Context{
-		"query": query,
+		"query":   query,
+		"filters": *filters,
 
 		"page":     page,
 		"frompage": search.cfg.Frontend.cfg.PerPage * page,

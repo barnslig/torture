@@ -2,11 +2,27 @@
 
 {% block article %}
 	<form action="/s" mode="GET" id="form-search">
-		<div class="input-group input-group-lg">
-			<input type="search" name="q" class="form-control" autocomplete="off" value="{{ query }}" autofocus="autofocus" />
-			<span class="input-group-btn">
-				<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-search"></i> Search</button>
-			</span>
+		<div class="form-group">
+			<div class="input-group input-group-lg">
+				<input type="search" name="q" class="form-control" autocomplete="off" value="{{ query }}" autofocus="autofocus" />
+				<span class="input-group-btn">
+					<button type="submit" class="btn btn-default">
+						<i class="glyphicon glyphicon-search" aria-hidden="true"></i>
+						Search
+					</button>
+				</span>
+			</div>
+		</div>
+
+		<div class="checkbox">
+			<h5 class="hidden-xs">Filters:</h5>
+
+			<label>
+				<input type="checkbox" name="f" value="small" {% if filters.SmallFiles %}checked="checked"{% endif %} />
+				Filter files smaller than 100B
+
+				<i class="glyphicon glyphicon-info-sign" data-toggle="popover" data-placement="bottom" data-trigger="hover" data-html="true" data-content="Files smaller than 100B are likely to be irrelevant meta information like .nfo files."></i>
+			</label>
 		</div>
 	</form>
 
