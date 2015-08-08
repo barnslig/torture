@@ -102,6 +102,10 @@ func (cr *Crawler) ScanFtpsFromFile(fileName string) (ftpServers []*Ftp, err err
 		ftpServers = append(ftpServers, ftp)
 	}
 
+	if err = scanner.Err(); err != nil {
+		return
+	}
+
 	return
 }
 
