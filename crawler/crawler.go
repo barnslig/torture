@@ -69,7 +69,7 @@ func (cr *Crawler) LoadFtps(fileName string) (err error) {
 			// Use the existing server object for already existing servers,
 			// thus re-use the existing FTP connection etc. pp.
 			for i, newServer := range servers {
-				if oldServer.Url == newServer.Url {
+				if oldServer.URL.String() == newServer.URL.String() {
 					servers[i] = oldServer
 					isIncluded = true
 				}

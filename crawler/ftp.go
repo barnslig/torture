@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jlaffaye/ftp"
+	"net/url"
 	"path"
 	"path/filepath"
 	"sync"
@@ -9,7 +10,7 @@ import (
 )
 
 type Ftp struct {
-	Url      string
+	URL      *url.URL
 	Running  bool
 	Obsolete bool
 	Conn     *ftp.ServerConn
@@ -18,14 +19,19 @@ type Ftp struct {
 	mt      *sync.Mutex
 }
 
-func CreateFtp(url string, crawler *Crawler) (ftp *Ftp, err error) {
+func CreateFtp(surl string, crawler *Crawler) (ftp *Ftp, err error) {
+	parsedURL, err := url.Parse(surl)
+	if err != nil {
+		return
+	}
+
 	ftp = &Ftp{
-		Url:     url,
+		URL:     parsedURL,
 		crawler: crawler,
 		mt:      &sync.Mutex{},
 	}
 
-	crawler.Log.Print("Added ", url)
+	crawler.Log.Print("Added ", parsedURL.String())
 	return
 }
 
@@ -34,7 +40,7 @@ func CreateFtp(url string, crawler *Crawler) (ftp *Ftp, err error) {
 // do likely need hundreds of connection retries
 func (elem *Ftp) ConnectLoop() {
 	for !elem.Obsolete {
-		conn, err := ftp.Connect(elem.Url)
+		conn, err := ftp.Connect(elem.URL.Host)
 		if err == nil {
 			elem.Conn = conn
 			break
@@ -45,12 +51,26 @@ func (elem *Ftp) ConnectLoop() {
 	}
 }
 
-// Try to login as anonymous user
+// LoginLoop consciously tries to login on the ftp server.
+// If the given URL specified password and/or user then those
+// values will be used otherwise it will fallback to anonymous:anonymous.
 // This function does not return errors as high-load FTPs
 // do likely need hundreds of login retries
 func (elem *Ftp) LoginLoop() {
+	userInfo := elem.URL.User
+	name := "anonymous"
+	if len(userInfo.Username()) > 0 {
+		name = userInfo.Username()
+	}
+
+	userPass, ps := userInfo.Password()
+	pass := "anonymous"
+	if ps {
+		pass = userPass
+	}
+
 	for !elem.Obsolete {
-		err := elem.Conn.Login("anonymous", "anonymous")
+		err := elem.Conn.Login(name, pass)
 		if err == nil {
 			break
 		}
@@ -118,7 +138,7 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 		if file.Type == ftp.EntryTypeFile {
 			var fservers []FtpEntry
 			fservers = append(fservers, FtpEntry{
-				Url:  elem.Url,
+				Url:  elem.URL.String(),
 				Path: ff,
 			})
 
