@@ -69,14 +69,14 @@ func (elem *Ftp) LoginLoop() {
 		pass = userPass
 	}
 
-	for !elem.Obsolete {
+	for i := 1; !elem.Obsolete; i++ {
 		err := elem.Conn.Login(name, pass)
 		if err == nil {
 			break
 		}
 
 		elem.crawler.Log.Print(err)
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(i) * time.Second)
 	}
 }
 
@@ -104,6 +104,7 @@ func (elem *Ftp) StartCrawling() (err error) {
 	for !elem.Obsolete {
 		elem.crawlDirectoryRecursive(pwd)
 	}
+
 	return
 }
 
@@ -113,8 +114,7 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 	}
 
 	var list []*ftp.Entry
-
-	func(elem *Ftp) {
+	func(elem *Ftp, list []*ftp.Entry) {
 		var err error
 
 		elem.mt.Lock()
@@ -124,7 +124,7 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 		if err != nil {
 			elem.crawler.Log.Print(err)
 		}
-	}(elem)
+	}(elem, list)
 
 	for _, file := range list {
 		ff := path.Join(dir, file.Name)
