@@ -47,14 +47,6 @@ func CreateSearch(cfg SearchConfig) (search *Search, err error) {
 func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	start := time.Now()
 
-	// Catch errors in the following code, log them and return a HTTP 500
-	defer func() {
-		if err, ok := recover().(error); ok {
-			search.cfg.Frontend.Log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	}()
-
 	/* Parse GET parameters
 	 * q: Search query
 	 * p: Current page. Is zero if not a number
@@ -75,20 +67,20 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 	// Do the actual search
 	resp, err := search.cfg.Frontend.elasticSearch.Search(query, *filters, search.cfg.Frontend.cfg.PerPage, page)
 	if err != nil {
-		search.cfg.Frontend.Log.Panic(err)
+		panic(err)
 	}
 
 	// Format: JSON
 	if format == "json" {
 		output, err := json.Marshal(resp.Hits)
 		if err != nil {
-			search.cfg.Frontend.Log.Panic(err)
+			panic(err)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		_, err = w.Write(output)
 		if err != nil {
-			search.cfg.Frontend.Log.Panic(err)
+			panic(err)
 		}
 
 		return
@@ -101,7 +93,7 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 		var result Result
 		err := unmarshalRawJson(qr.Source, &result)
 		if err != nil {
-			search.cfg.Frontend.Log.Panic(err)
+			panic(err)
 		}
 
 		// Humanize the file size

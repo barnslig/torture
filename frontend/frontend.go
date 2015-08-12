@@ -40,6 +40,13 @@ func CreateFrontend(cfg FrontendConfig) (frontend *Frontend, err error) {
 	frontend.templates.SetBaseDirectory("templates")
 
 	// Sub-Apps
+	errorCatcher, err := CreateErrorCatcher(ErrorCatcherConfig{
+		Frontend: frontend,
+	})
+	if err != nil {
+		return
+	}
+
 	search, err := CreateSearch(SearchConfig{
 		Frontend: frontend,
 	})
@@ -48,7 +55,7 @@ func CreateFrontend(cfg FrontendConfig) (frontend *Frontend, err error) {
 	}
 
 	mux := httprouter.New()
-	mux.Handle("GET", "/s", search.Handler)
+	mux.Handle("GET", "/s", errorCatcher.Handler(search.Handler))
 	mux.Handler("GET", "/", http.RedirectHandler("/s", 301))
 	mux.ServeFiles("/static/*filepath", http.Dir("static"))
 
