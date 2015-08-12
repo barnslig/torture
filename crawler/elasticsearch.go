@@ -22,12 +22,13 @@ type ElasticSearch struct {
 
 type hash map[string]interface{}
 
-func CreateElasticSearch(host string, cr *Crawler) (es *ElasticSearch, err error) {
-	es = &ElasticSearch{crawler: cr}
+func CreateElasticSearch(host string, cr *Crawler) *ElasticSearch {
+	es := &ElasticSearch{crawler: cr}
 
 	es.Conn = elastigo.NewConn()
 	es.Conn.Domain = host
-	return
+
+	return es
 }
 
 func (es *ElasticSearch) CreateMappingAndIndex() (err error) {
@@ -77,6 +78,7 @@ func (es *ElasticSearch) GetFileEntry(file FileEntry) (entry *elastigo.Hit, err 
 			},
 		},
 	}
+
 	response, err := es.Conn.Search("torture", "file", nil, searchQ)
 	if err != nil {
 		return
@@ -85,6 +87,7 @@ func (es *ElasticSearch) GetFileEntry(file FileEntry) (entry *elastigo.Hit, err 
 	if response.Hits.Len() > 0 {
 		entry = &response.Hits.Hits[0]
 	}
+
 	return
 }
 
@@ -115,5 +118,9 @@ func (es *ElasticSearch) AddFileEntry(file FileEntry) (res elastigo.BaseResponse
 
 	// Entry does not exist; Index it
 	res, err = es.Conn.Index("torture", "file", "", nil, file)
+	if err != nil {
+		return
+	}
+
 	return
 }

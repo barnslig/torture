@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jlaffaye/ftp"
+	"net/url"
 	"path"
 	"path/filepath"
 	"sync"
@@ -9,23 +10,27 @@ import (
 )
 
 type Ftp struct {
-	Url      string
+	URL      *url.URL
 	Running  bool
 	Obsolete bool
 	Conn     *ftp.ServerConn
 
 	crawler *Crawler
-	mt      *sync.Mutex
+	mt      sync.Mutex
 }
 
-func CreateFtp(url string, crawler *Crawler) (ftp *Ftp, err error) {
-	ftp = &Ftp{
-		Url:     url,
-		crawler: crawler,
-		mt:      &sync.Mutex{},
+func CreateFtp(surl string, crawler *Crawler) (ftp *Ftp, err error) {
+	parsedURL, err := url.Parse(surl)
+	if err != nil {
+		return
 	}
 
-	crawler.Log.Print("Added ", url)
+	ftp = &Ftp{
+		URL:     parsedURL,
+		crawler: crawler,
+	}
+
+	crawler.Log.Print("Added ", parsedURL.String())
 	return
 }
 
@@ -34,7 +39,7 @@ func CreateFtp(url string, crawler *Crawler) (ftp *Ftp, err error) {
 // do likely need hundreds of connection retries
 func (elem *Ftp) ConnectLoop() {
 	for !elem.Obsolete {
-		conn, err := ftp.Connect(elem.Url)
+		conn, err := ftp.Connect(elem.URL.Host)
 		if err == nil {
 			elem.Conn = conn
 			break
@@ -45,18 +50,32 @@ func (elem *Ftp) ConnectLoop() {
 	}
 }
 
-// Try to login as anonymous user
+// LoginLoop consciously tries to login on the ftp server.
+// If the given URL specified password and/or user then those
+// values will be used otherwise it will fallback to anonymous:anonymous.
 // This function does not return errors as high-load FTPs
 // do likely need hundreds of login retries
 func (elem *Ftp) LoginLoop() {
-	for !elem.Obsolete {
-		err := elem.Conn.Login("anonymous", "anonymous")
+	userInfo := elem.URL.User
+	name := "anonymous"
+	if len(userInfo.Username()) > 0 {
+		name = userInfo.Username()
+	}
+
+	userPass, ps := userInfo.Password()
+	pass := "anonymous"
+	if ps {
+		pass = userPass
+	}
+
+	for i := 1; !elem.Obsolete; i++ {
+		err := elem.Conn.Login(name, pass)
 		if err == nil {
 			break
 		}
 
 		elem.crawler.Log.Print(err)
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(i) * time.Second)
 	}
 }
 
@@ -84,6 +103,7 @@ func (elem *Ftp) StartCrawling() (err error) {
 	for !elem.Obsolete {
 		elem.crawlDirectoryRecursive(pwd)
 	}
+
 	return
 }
 
@@ -93,8 +113,7 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 	}
 
 	var list []*ftp.Entry
-
-	func(elem *Ftp) {
+	func(elem *Ftp, list []*ftp.Entry) {
 		var err error
 
 		elem.mt.Lock()
@@ -104,7 +123,7 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 		if err != nil {
 			elem.crawler.Log.Print(err)
 		}
-	}(elem)
+	}(elem, list)
 
 	for _, file := range list {
 		ff := path.Join(dir, file.Name)
@@ -118,7 +137,7 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 		if file.Type == ftp.EntryTypeFile {
 			var fservers []FtpEntry
 			fservers = append(fservers, FtpEntry{
-				Url:  elem.Url,
+				Url:  elem.URL.String(),
 				Path: ff,
 			})
 

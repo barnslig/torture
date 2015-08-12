@@ -30,10 +30,7 @@ func CreateCrawler(cfg Config) (cr *Crawler, err error) {
 	cr.Log = log.New(cr.cfg.LogOutput, "crawler: ", log.Ldate|log.Lshortfile)
 
 	// Create an ElasticSearch connection
-	cr.elasticSearch, err = CreateElasticSearch(cr.cfg.ElasticServer, cr)
-	if err != nil {
-		return
-	}
+	cr.elasticSearch = CreateElasticSearch(cr.cfg.ElasticServer, cr)
 
 	// Create index and mapping
 	err = cr.elasticSearch.CreateMappingAndIndex()
@@ -69,7 +66,7 @@ func (cr *Crawler) LoadFtps(fileName string) (err error) {
 			// Use the existing server object for already existing servers,
 			// thus re-use the existing FTP connection etc. pp.
 			for i, newServer := range servers {
-				if oldServer.Url == newServer.Url {
+				if oldServer.URL.String() == newServer.URL.String() {
 					servers[i] = oldServer
 					isIncluded = true
 				}
@@ -101,8 +98,14 @@ func (cr *Crawler) ScanFtpsFromFile(fileName string) (ftpServers []*Ftp, err err
 		if err != nil {
 			return nil, err
 		}
+
 		ftpServers = append(ftpServers, ftp)
 	}
+
+	if err = scanner.Err(); err != nil {
+		return
+	}
+
 	return
 }
 
