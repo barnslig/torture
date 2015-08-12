@@ -16,7 +16,7 @@ type Ftp struct {
 	Conn     *ftp.ServerConn
 
 	crawler *Crawler
-	mt      *sync.Mutex
+	mt      sync.Mutex
 }
 
 func CreateFtp(surl string, crawler *Crawler) (ftp *Ftp, err error) {
@@ -28,7 +28,6 @@ func CreateFtp(surl string, crawler *Crawler) (ftp *Ftp, err error) {
 	ftp = &Ftp{
 		URL:     parsedURL,
 		crawler: crawler,
-		mt:      &sync.Mutex{},
 	}
 
 	crawler.Log.Print("Added ", parsedURL.String())
