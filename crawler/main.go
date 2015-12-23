@@ -7,7 +7,7 @@ import (
 
 var (
 	serversFile   = flag.String("f", "servers.txt", "File with one ftp per line")
-	elasticServer = flag.String("es", "localhost", "ElasticSearch host")
+	elasticServer = flag.String("es", "http://localhost:9200", "ElasticSearch host")
 )
 
 func main() {

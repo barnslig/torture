@@ -30,7 +30,10 @@ func CreateCrawler(cfg Config) (cr *Crawler, err error) {
 	cr.Log = log.New(cr.cfg.LogOutput, "crawler: ", log.Ldate|log.Lshortfile)
 
 	// Create an ElasticSearch connection
-	cr.elasticSearch = CreateElasticSearch(cr.cfg.ElasticServer, cr)
+	cr.elasticSearch, err = CreateElasticSearch(cr.cfg.ElasticServer, cr)
+	if err != nil {
+		return
+	}
 
 	// Create index and mapping
 	err = cr.elasticSearch.CreateMappingAndIndex()

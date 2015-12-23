@@ -15,7 +15,8 @@ For dependency version management, gopm is used. [Please install gopm before con
 
 ### Crawler
 1. Create a `servers.txt` somewhere. Example is given inside `crawler/`.
-2. Run the crawler
+2. You need to add `script.engine.groovy.inline.update: true` to your `elasticsearch.yml`
+3. Run the crawler
 
 ### Frontend
 1. Run the frontend
