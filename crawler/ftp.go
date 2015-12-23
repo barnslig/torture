@@ -56,16 +56,16 @@ func (elem *Ftp) ConnectLoop() {
 // This function does not return errors as high-load FTPs
 // do likely need hundreds of login retries
 func (elem *Ftp) LoginLoop() {
-	userInfo := elem.URL.User
 	name := "anonymous"
-	if len(userInfo.Username()) > 0 {
-		name = userInfo.Username()
-	}
-
-	userPass, ps := userInfo.Password()
 	pass := "anonymous"
-	if ps {
-		pass = userPass
+
+	// Try to parse username/password from the URL
+	userInfo := elem.URL.User
+	if userInfo != nil {
+		name = userInfo.Username()
+		if _pass, ok := userInfo.Password(); ok {
+			pass = _pass
+		}
 	}
 
 	for i := 1; !elem.Obsolete; i++ {
@@ -100,9 +100,7 @@ func (elem *Ftp) StartCrawling() (err error) {
 		return
 	}
 
-	for !elem.Obsolete {
-		elem.crawlDirectoryRecursive(pwd)
-	}
+	elem.crawlDirectoryRecursive(pwd)
 
 	return
 }
@@ -112,18 +110,17 @@ func (elem *Ftp) crawlDirectoryRecursive(dir string) {
 		return
 	}
 
-	var list []*ftp.Entry
-	func(elem *Ftp, list []*ftp.Entry) {
-		var err error
-
+	list, err := func(elem *Ftp) (list []*ftp.Entry, err error) {
 		elem.mt.Lock()
 		defer elem.mt.Unlock()
 
 		list, err = elem.Conn.List(dir)
-		if err != nil {
-			elem.crawler.Log.Print(err)
-		}
-	}(elem, list)
+		return
+	}(elem)
+
+	if err != nil {
+		elem.crawler.Log.Print(err)
+	}
 
 	for _, file := range list {
 		ff := path.Join(dir, file.Name)
