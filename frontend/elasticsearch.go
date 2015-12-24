@@ -28,6 +28,21 @@ func (es *ElasticSearch) Search(query string, filters Filter, perPage int, page 
 
 	filterQ := make(hash)
 
+	// Filter: Boost large files
+	if filters.LargeFiles {
+		matchQ = hash{
+			"function_score": hash{
+				"query": matchQ,
+				"field_value_factor": hash{
+					"field":    "Size",
+					"missing":  1,
+					"modifier": "log1p",
+					"factor":   0.000000001,
+				},
+			},
+		}
+	}
+
 	// Filter: Files smaller than 100B
 	if filters.SmallFiles {
 		filterQ["range"] = hash{

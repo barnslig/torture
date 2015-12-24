@@ -10,6 +10,7 @@ import (
 
 type Hit struct {
 	Id     string           `json:"_id"`
+	Score  float32          `json:"_score"`
 	Source *json.RawMessage `json:"_source"`
 }
 

@@ -6,6 +6,7 @@ import (
 
 type Filter struct {
 	SmallFiles bool
+	LargeFiles bool
 }
 
 func CreateFilter() (filter *Filter) {
@@ -34,6 +35,10 @@ func (filter *Filter) UnmarshalStringSlice(input []string) {
 		switch el {
 		case "small":
 			filter.SmallFiles = true
+			break
+		case "large":
+			filter.LargeFiles = true
+			break
 		}
 	}
 }

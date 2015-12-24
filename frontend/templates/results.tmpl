@@ -23,6 +23,13 @@
 
 				<i class="glyphicon glyphicon-question-sign" data-toggle="popover" data-placement="bottom" data-trigger="hover" data-html="true" data-content="Files smaller than 100B are likely to be irrelevant meta information like .nfo files."></i>
 			</label>
+
+			<label>
+				<input type="checkbox" name="f" value="large" {% if filters.LargeFiles %}checked="checked"{% endif %} />
+				Boost large files
+
+				<i class="glyphicon glyphicon-question-sign" data-toggle="popover" data-placement="bottom" data-trigger="hover" data-html="true" data-content="Searching for <i>&quot;your favorite Linux distri&quot;</i>? Give larger files a boost!"></i>
+			</label>
 		</div>
 	</form>
 
