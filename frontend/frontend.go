@@ -54,8 +54,16 @@ func CreateFrontend(cfg FrontendConfig) (frontend *Frontend, err error) {
 		return
 	}
 
+	help, err := CreateHelp(HelpConfig{
+		Frontend: frontend,
+	})
+	if err != nil {
+		return
+	}
+
 	mux := httprouter.New()
 	mux.Handle("GET", "/s", errorCatcher.Handler(search.Handler))
+	mux.Handle("GET", "/help", errorCatcher.Handler(help.Handler))
 	mux.Handler("GET", "/", http.RedirectHandler("/s", 301))
 	mux.ServeFiles("/static/*filepath", http.Dir("static"))
 

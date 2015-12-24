@@ -2,6 +2,10 @@ header h1 img {
 	margin-top: -15px;
 }
 
+.header-btn {
+	margin-top: -10px;
+}
+
 .stat, #form-search .checkbox {
 	margin-top: 15px;
 	margin-left: 40px;

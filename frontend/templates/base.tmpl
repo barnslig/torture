@@ -20,9 +20,14 @@
 			<div class="row">
 				<div class="col-md-9 col-md-offset-1">
 					<header>
-						<h1><img src="/static/logo.png" /> Find Your File</h1>
+						<h1>
+							<img src="/static/logo.png" /> 
+							Find Your File 
+							<a href="/help" class="btn btn-default header-btn"><span class="glyphicon glyphicon-earphone"></span> Help</a>
+						</h1>
 					</header>
 					<article>
+						{% include "_searchform.tmpl" %}
 						{% block article %}
 						{% endblock %}
 					</article>

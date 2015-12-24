@@ -1,0 +1,67 @@
+{% extends "base.tmpl" %}
+
+{% block article %}
+<hr />
+<p>Welcome to the first CCC event file search engine that does not suck! This one is blazing-fast as it is built using Hipster web technologies like <i>Go</i> and <i>Elasticsearch</i>!</p>
+
+<h3>Adding treats to your query</h3>
+<p>Normally it should be enough to just throw some words onto the search engine to get reasonably good results. Search queries are currently improved by:</p>
+<ul>
+	<li>Giving large files a boost</li>
+</ul>
+<p>However, it is possible to refine your results using a query language that you can place somewhere in your query. All these <i>treats</i> are interpreted as <i>AND</i>. Currently, the only way to do <i>OR</i> queries is to do multiple search queries.</p>
+<div class="table-responsive">
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>Examples</th>
+				<th>Explanation</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					<pre>extension:pdf</pre>
+					<pre>extension!mkv</pre>
+				</td>
+				<td>
+					<p>Specify a file extension.</p>
+					<ul>
+						<li>Possible delimiters: <code>:</code> (EQUALS), <code>!</code> (NOT)</li>
+						<li>Possible values: letters and numbers</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<pre>size&gt;150mb</pre>
+					<pre>size&lt;2gb</pre>
+				</td>
+				<td>
+					<p>Specify a file size.</p>
+					<ul>
+						<li>Possible delimiters: <code>&gt;</code> (GREATER OR EQUAL), <code>&lt;</code> (LESS OR EQUAL)</li>
+						<li>Possible values: Humanized sizes, e.g. <code>20gb</code></li>
+					</ul>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<h3>Adding/removing your FTP</h3>
+<p>Your file host is missing? The crawler is doing half the load of your machine? Something itches? Contact us:</p>
+<ul>
+	<li>In person: Geheimorganisation assembly</li>
+	<li>By mail: TODO</li>
+	<li>Via phone: TODO</li>
+</ul>
+<p>The crawler currently only supports FTP and maybe some HTTP in the future™.</p>
+
+<h3>API</h3>
+<p>It is possible to get search results as JSON by adding <code>&format=json</code> to the URL. Beware that there is a pagination using <code>&p=[0..]</code>, but the JSON currently does not tell you how many pages are left!</p>
+
+<h3>Improving your results</h3>
+<p>If you think the results are still bad, just come around at the Geheimorganisation assembly and see if we trade you a Gold™ account for free alcohol or so.</p>
+<p>Code geniuses® are also allowed to contribute to our World-Class application over here: <a href="https://github.com/barnslig/torture">github.com/barnslig/torture</a></p>
+{% endblock %}
