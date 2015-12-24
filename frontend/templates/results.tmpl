@@ -36,7 +36,7 @@
 				On the following servers:
 				<ul>
 					{% for server in result.Servers %}
-						<li class="link"><a href="ftp://{{server.Url}}{{server.Path}}">{{server.Url}}{{server.Path}}</a></li>
+						<li class="link"><a href="{{server.Url}}{{server.Path}}">{{server.Url}}{{server.Path}}</a></li>
 					{% endfor %}
 				</ul>
 			</li>
