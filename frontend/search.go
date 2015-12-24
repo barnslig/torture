@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,11 +62,11 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 	}
 
 	r.ParseForm()
-	filters := CreateFilter()
-	filters.UnmarshalStringSlice(r.Form["f"])
+
+	stmt := TreatParser(strings.NewReader(query))
 
 	// Do the actual search
-	resp, err := search.cfg.Frontend.elasticSearch.Search(query, *filters, search.cfg.Frontend.cfg.PerPage, page)
+	resp, err := search.cfg.Frontend.elasticSearch.Search(stmt, search.cfg.Frontend.cfg.PerPage, page)
 	if err != nil {
 		panic(err)
 	}
@@ -102,8 +103,7 @@ func (search *Search) Handler(w http.ResponseWriter, r *http.Request, params htt
 	}
 
 	search.tmpl.ExecuteWriter(pongo2.Context{
-		"query":   query,
-		"filters": *filters,
+		"query": query,
 
 		"page":     page,
 		"frompage": search.cfg.Frontend.cfg.PerPage * page,
