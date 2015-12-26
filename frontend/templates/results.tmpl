@@ -16,7 +16,7 @@
 	<ol id="search-results" start="{{frompage + 1}}">
 		{% for result in results %}
 			<li>
-				<a href="ftp://{{result.Servers.0.Url}}{{result.Servers.0.Path}}">
+				<a href="{{result.Servers.0.Url}}{{result.Servers.0.Path}}">
 					<h3>{{ result.Filename }} <small>{{ result.HumanSize }}</small></h3>
 				</a>
 				On the following servers:

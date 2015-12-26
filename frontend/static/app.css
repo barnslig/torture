@@ -12,8 +12,8 @@ header h1 img {
 }
 
 #form-search input, #form-search button[type="submit"] {
-	color: #3F5700;
-	border-color: #728a30;
+	color: #000;
+	border-color: #000;
 }
 
 #form-search input {
