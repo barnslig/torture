@@ -34,6 +34,23 @@ func CreateElasticSearch(host string, cr *Crawler) (es *ElasticSearch, err error
 
 func (es *ElasticSearch) CreateMappingAndIndex() (err error) {
 	_, err = elastic.Request("PUT", elastic.URL(es.url, "/torture"), hash{
+		"settings": hash{
+			"analysis": hash{
+				"analyzer": hash{
+					"filename": hash{
+						"type":      "custom",
+						"tokenizer": "filename",
+						"filter":    []string{"lowercase"},
+					},
+				},
+				"tokenizer": hash{
+					"filename": hash{
+						"type":    "pattern",
+						"pattern": "[^\\p{L}\\d]+",
+					},
+				},
+			},
+		},
 		"mappings": hash{
 			"file": hash{
 				"_timestamp": hash{
@@ -43,6 +60,22 @@ func (es *ElasticSearch) CreateMappingAndIndex() (err error) {
 					"Filename": hash{
 						"type":  "string",
 						"index": "not_analyzed",
+					},
+					"Size": hash{
+						"type":  "double",
+						"index": "not_analyzed",
+					},
+					"Servers": hash{
+						"properties": hash{
+							"Url": hash{
+								"type":  "string",
+								"index": "not_analyzed",
+							},
+							"Path": hash{
+								"type":     "string",
+								"analyzer": "filename",
+							},
+						},
 					},
 				},
 			},
