@@ -29,7 +29,7 @@ func (es *ElasticSearch) Search(stmt Statement, perPage int, page int) (result e
 				"match": hash{
 					"Servers.Path": hash{
 						"query":     query,
-						"fuzziness": 1,
+						"fuzziness": 0.4,
 					},
 				},
 			},
