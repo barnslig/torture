@@ -26,11 +26,10 @@ func (es *ElasticSearch) Search(stmt Statement, perPage int, page int) (result e
 	matchQ := hash{
 		"function_score": hash{
 			"query": hash{
-				"match": hash{
-					"Servers.Path": hash{
-						"query":     query,
-						"fuzziness": 0.4,
-					},
+				"query_string": hash{
+					"default_field": "Servers.Path",
+					"default_operator": "AND",
+					"query": query,
 				},
 			},
 			"field_value_factor": hash{
