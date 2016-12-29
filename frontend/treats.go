@@ -28,11 +28,13 @@ const (
 	keyExtension Key = iota
 	keySize
 	keyServer
+	keyType
 )
 
 var keys = map[string]Key{
 	"extension": keyExtension,
 	"size":      keySize,
+	"type":      keyType,
 }
 
 /* Operators specify how the treat should be applied. Only operators specified

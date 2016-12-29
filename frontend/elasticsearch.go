@@ -95,6 +95,45 @@ func (es *ElasticSearch) Search(stmt Statement, perPage int, page int) (result e
 			})
 		}
 
+		// Filter for media types, e.g. type:video, type:audio
+		if treat.Key == keyType {
+			endingsRegex := "*"
+			switch treat.Value {
+			case "video":
+				endingsRegex = "(webm|mkv|flv|vob|ogv|avi|mov|wmv|mp4|mpg|mpeg|m4v|3gp|mts)"
+				break
+			case "audio":
+				endingsRegex = "(aac|aiff|amr|flac|m4a|mp3|ogg|oga|opus|wav|wma)"
+				break
+			case "image":
+				endingsRegex = "(jpg|jpeg|tiff|gif|bmp|png|webp|psd|xcf|svg|ai)"
+				break
+			case "document":
+				endingsRegex = "(epub|doc|docx|html|tex|ibooks|azw|mobi|pdf|txt|ps|rtf|xps|odt)"
+				break
+			default:
+				continue
+			}
+
+			regex := ""
+			switch treat.Operator {
+			case EQUALS:
+				regex = fmt.Sprintf(`.+.%s`, endingsRegex)
+				break
+			case NOT:
+				regex = fmt.Sprintf(`@&~(.+.%s)`, endingsRegex)
+				break
+			default:
+				continue
+			}
+
+			filterQ = append(filterQ, hash{
+				"regexp": hash{
+					"Filename": regex,
+				},
+			})
+		}
+
 	}
 
 	data, err := elastic.Request("GET", elastic.URL(es.url, "/torture/file/_search"), hash{
