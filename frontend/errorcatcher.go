@@ -4,7 +4,12 @@ import (
 	"github.com/flosch/pongo2"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"encoding/json"
 )
+
+type JsonError struct {
+	Error string `json:"error"`
+}
 
 type ErrorCatcherConfig struct {
 	Frontend *Frontend
@@ -36,6 +41,29 @@ func (errorCatcher *ErrorCatcher) Handler(h httprouter.Handle) httprouter.Handle
 				errorCatcher.cfg.Frontend.Log.Println(err)
 
 				w.WriteHeader(http.StatusInternalServerError)
+
+				/* Parse GET parameters
+				 * format: Format. Default is HTML, currently supported options: "json"
+				 */
+				format := r.FormValue("format")
+
+				if format == "json" {
+					output, err := json.Marshal(JsonError{
+						Error: err.Error(),
+					})
+					if err != nil {
+						panic(err)
+					}
+
+					w.Header().Set("Content-Type", "application/json")
+					_, err = w.Write(output)
+					if err != nil {
+						panic(err)
+					}
+
+					return
+				}
+
 				errorCatcher.tmpl.ExecuteWriter(pongo2.Context{
 					"msg": err.Error(),
 				}, w)
