@@ -21,6 +21,7 @@ type Hits struct {
 
 type Result struct {
 	Hits Hits `json:"hits"`
+	Aggregations *json.RawMessage `json:"aggregations"`
 }
 
 type Error struct {

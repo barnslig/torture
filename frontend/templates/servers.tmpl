@@ -1,0 +1,25 @@
+{% extends "base.tmpl" %}
+
+{% block article %}
+<hr />
+<table class="table">
+	<thead>
+		<tr>
+			<th>URL</th>
+			<th>File count</th>
+			<th>Size of crawled files</th>
+			<th>Last file discovery</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for server in servers %}
+			<tr>
+				<td><a href="{{server.Url}}">{{server.Url}}</a></td>
+				<td>{{server.FileCount}}</td>
+				<td>{{server.FullSize}}</td>
+				<td>{{server.LatestFileTime}}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
