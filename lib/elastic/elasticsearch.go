@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"log"
 )
 
 type Hit struct {
@@ -20,7 +22,7 @@ type Hits struct {
 }
 
 type Result struct {
-	Hits Hits `json:"hits"`
+	Hits         Hits             `json:"hits"`
 	Aggregations *json.RawMessage `json:"aggregations"`
 }
 
@@ -28,11 +30,22 @@ type Error struct {
 	Type string `json:"type"`
 }
 
+// Add a path to a given host
+// Example: URL("http://localhost:9200", "/torture") --> http://localhost:9200/torture
 func URL(host string, path string) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(host)
-	buffer.WriteString(path)
-	return buffer.String()
+	parsedHost, err := url.Parse(host)
+	if err != nil {
+		panic(err)
+	}
+
+	parsedHost.Path = path
+	return parsedHost.String()
+}
+
+// Parse a response into the Result struct
+func ParseResponse(data []byte) (result Result, err error) {
+	err = json.Unmarshal(data, &result)
+	return
 }
 
 func Request(method string, url string, payload interface{}) (data []byte, err error) {
@@ -47,6 +60,8 @@ func Request(method string, url string, payload interface{}) (data []byte, err e
 	if err != nil {
 		return
 	}
+
+	req.Header.Add("Content-Type", "application/json")
 
 	// Do the HTTP request
 	client := &http.Client{}
@@ -77,6 +92,7 @@ func Request(method string, url string, payload interface{}) (data []byte, err e
 	esError := Error{}
 	err = json.Unmarshal(*outerMsg["error"], &esError)
 	if err != nil {
+		log.Printf("%s\n", *outerMsg["error"])
 		return
 	}
 

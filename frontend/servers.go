@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/flosch/pongo2"
-	"github.com/julienschmidt/httprouter"
+	"encoding/json"
 	"github.com/barnslig/torture/lib/elastic"
 	"github.com/dustin/go-humanize"
+	"github.com/flosch/pongo2"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
-	"encoding/json"
 	"time"
 )
 
@@ -16,10 +16,10 @@ type ServersValue struct {
 }
 
 type ServersBucket struct {
-	Url string `json:"key"`
-	FileCount json.Number `json:"doc_count"`
+	Url            string       `json:"key"`
+	FileCount      json.Number  `json:"doc_count"`
 	LatestFileTime ServersValue `json:"latest_file"`
-	FullSize ServersValue `json:"full_size"`
+	FullSize       ServersValue `json:"full_size"`
 }
 
 type ServersByUrl struct {
@@ -32,9 +32,9 @@ type ServersAggregations struct {
 
 // view data structure
 type ServersServer struct {
-	Url string
-	FileCount uint64
-	FullSize string
+	Url            string
+	FileCount      uint64
+	FullSize       string
 	LatestFileTime string
 }
 
@@ -80,7 +80,7 @@ func (servers *Servers) Handler(w http.ResponseWriter, r *http.Request, params h
 					},
 					"latest_file": hash{
 						"max": hash{
-							"field": "_timestamp",
+							"field": "LastSeen",
 						},
 					},
 				},
@@ -120,9 +120,9 @@ func (servers *Servers) Handler(w http.ResponseWriter, r *http.Request, params h
 		fileCount := uint64(fileCountFloat)
 
 		serversList = append(serversList, ServersServer{
-			Url: server.Url,
-			FileCount: fileCount,
-			FullSize: fullSize,
+			Url:            server.Url,
+			FileCount:      fileCount,
+			FullSize:       fullSize,
 			LatestFileTime: latestFileTime,
 		})
 	}

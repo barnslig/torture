@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/flosch/pongo2"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
-	"encoding/json"
 )
 
 type JsonError struct {

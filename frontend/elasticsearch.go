@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/barnslig/torture/lib/elastic"
 	"github.com/dustin/go-humanize"
@@ -22,24 +21,6 @@ func CreateElasticSearch(host string) (es *ElasticSearch, err error) {
 
 func (es *ElasticSearch) Search(stmt Statement, perPage int, page int) (result elastic.Result, err error) {
 	query := strings.Join(stmt.Phrases, " ")
-
-	matchQ := hash{
-		"function_score": hash{
-			"query": hash{
-				"simple_query_string": hash{
-					"fields": []string{"Servers.Path"},
-					"default_operator": "AND",
-					"query": query,
-				},
-			},
-			"field_value_factor": hash{
-				"field":    "Size",
-				"missing":  1,
-				"modifier": "log1p",
-				"factor":   0.000000001, // Increase Bytes to Gigabytes
-			},
-		},
-	}
 
 	filterQ := []hash{}
 	for _, treat := range stmt.Treats {
@@ -136,17 +117,29 @@ func (es *ElasticSearch) Search(stmt Statement, perPage int, page int) (result e
 
 	}
 
-	data, err := elastic.Request("GET", elastic.URL(es.url, "/torture/file/_search"), hash{
+	data, err := elastic.Request("POST", elastic.URL(es.url, "/torture/file/_search"), hash{
 		"size": perPage,
 		"from": perPage * page,
 		"query": hash{
-			"filtered": hash{
-				"query": matchQ,
-				"filter": hash{
-					"and": hash{
-						"filters": filterQ,
+			"bool": hash{
+				"must": hash{
+					"function_score": hash{
+						"query": hash{
+							"simple_query_string": hash{
+								"fields":           []string{"Servers.Path"},
+								"default_operator": "AND",
+								"query":            query,
+							},
+						},
+						"field_value_factor": hash{
+							"field":    "Size",
+							"missing":  1,
+							"modifier": "log1p",
+							"factor":   0.000000001, // Increase Bytes to Gigabytes
+						},
 					},
 				},
+				"filter": filterQ,
 			},
 		},
 	})
@@ -154,8 +147,7 @@ func (es *ElasticSearch) Search(stmt Statement, perPage int, page int) (result e
 		return
 	}
 
-	result = elastic.Result{}
-	err = json.Unmarshal(data, &result)
+	result, err = elastic.ParseResponse(data)
 
 	return
 }

@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "TkfuP7j+nMxKBz3y73NwOLOuXBs=",
+			"path": "github.com/jlaffaye/ftp",
+			"revision": "299b7ff5b6096588cceca2edc1fc9f557002fb85",
+			"revisionTime": "2017-09-27T16:34:33Z"
+		},
+		{
+			"checksumSHA1": "uUtXBFLUIO6B03tMVPu18NPuqhU=",
+			"path": "github.com/temoto/robotstxt",
+			"revision": "9e4646fa705336d5b2fa9dddfafbe0a1a965acd7",
+			"revisionTime": "2017-06-03T01:35:57Z"
+		},
+		{
+			"checksumSHA1": "2t6c6F2y4b/PEV04TOHpQxh/xLc=",
+			"path": "golang.org/x/net/html",
+			"revision": "d866cfc389cec985d6fda2859936a575a55a3ab6",
+			"revisionTime": "2017-12-11T20:45:21Z"
+		}
+	],
+	"rootPath": "github.com/barnslig/torture/crawler"
+}

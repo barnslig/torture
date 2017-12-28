@@ -1,0 +1,8 @@
+{
+  "entrypoints": [
+    {
+      "entry": "http://localhost:8000/test/",
+      "obeyRobotsTxt": false
+    }
+  ]
+}

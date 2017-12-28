@@ -1,0 +1,29 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "tJd2T/eyW6ejAev7WzGxTeUVOPQ=",
+			"path": "github.com/dustin/go-humanize",
+			"revision": "bb3d318650d48840a39aa21a027c6630e198e626",
+			"revisionTime": "2017-11-10T20:55:13Z"
+		},
+		{
+			"checksumSHA1": "qiENYqUrXwLDI5+u71L6UhfoOfE=",
+			"path": "github.com/flosch/pongo2",
+			"revision": "5e81b817a0c48c1c57cdf1a9056cf76bdee02ca9",
+			"revisionTime": "2014-10-28T00:08:13Z",
+			"version": "v3",
+			"versionExact": "v3.0"
+		},
+		{
+			"checksumSHA1": "ezRkrYYy9mMxREVDryjD5NlHa7M=",
+			"path": "github.com/julienschmidt/httprouter",
+			"revision": "8c199fb6259ffc1af525cc3ad52ee60ba8359669",
+			"revisionTime": "2015-04-21T17:00:07Z",
+			"version": "v1.1",
+			"versionExact": "v1.1"
+		}
+	],
+	"rootPath": "github.com/barnslig/torture/frontend"
+}
