@@ -31,16 +31,6 @@ func pathDepth(filePath string) int {
 	return len(strings.Split(cleanPath, "/"))
 }
 
-func HttpGetUnsafe(reqUrl string) (resp *http.Response, err error) {
-	tr := http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-	client := &http.Client{Transport: &tr}
-	return client.Get(reqUrl)
-}
-
 type HttpCrawlerConfig struct {
 	BodySizeLimit int64         `json:"maxBodySize"`
 	Entry         string        `json:"entry"`
@@ -57,11 +47,22 @@ type HttpCrawler struct {
 
 	RobotsTestAgent *robotstxt.Group
 	Ticker          <-chan time.Time
+	HttpClient      *http.Client
 }
 
 func CreateHttpCrawler(rawConfig *json.RawMessage) (crawler *HttpCrawler, err error) {
 	// Create a new instance
-	crawler = &HttpCrawler{}
+	crawler = &HttpCrawler{
+		// Share an http.Client so we can keep alive connections
+		HttpClient: &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					MaxIdleConnsPerHost: 1024,
+					InsecureSkipVerify: true,
+				},
+			},
+		},
+	}
 
 	// Parse config while providing default values
 	config := HttpCrawlerConfig{
@@ -96,7 +97,7 @@ func CreateHttpCrawler(rawConfig *json.RawMessage) (crawler *HttpCrawler, err er
 		robotsURL = *entry
 		robotsURL.Path = "/robots.txt"
 
-		robotsRes, robotsErr := HttpGetUnsafe(robotsURL.String())
+		robotsRes, robotsErr := crawler.httpGet(robotsURL.String())
 		if robotsErr == nil {
 			defer robotsRes.Body.Close()
 
@@ -111,6 +112,10 @@ func CreateHttpCrawler(rawConfig *json.RawMessage) (crawler *HttpCrawler, err er
 	}
 
 	return
+}
+
+func (crawler *HttpCrawler) httpGet(reqUrl string) (resp *http.Response, err error) {
+	return crawler.HttpClient.Get(reqUrl)
 }
 
 func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) {
@@ -131,7 +136,7 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 	// 1. Save a request as otherwise we would have to create one HEAD request
 	//    before every GET to check for the content type and content length
 	// 2. Work around broken HEAD implementations
-	resp, err := HttpGetUnsafe(entryStr)
+	resp, err := crawler.httpGet(entryStr)
 	if err != nil {
 		return
 	}
