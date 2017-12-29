@@ -154,13 +154,14 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 
 	// We only continue walking on Content-Type: text/html files and call the
 	// WalkFunction on all other files
-	// TODO implement fallback mime sniffing (magic numbers parsing)
-	mime, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	mimeType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 	if err != nil {
-		return
+		// sometimes there is no Content-Type returned
+		// TODO implement fallback mime sniffing (magic numbers parsing)
+		mimeType = mime.TypeByExtension(path.Ext(entryStr))
 	}
 
-	if mime != "text/html" {
+	if mimeType != "text/html" {
 		var modTime time.Time
 		lastModified := resp.Header.Get("Last-Modified")
 		if lastModified != "" {
@@ -174,7 +175,7 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 		fn(entryStr, FileInfo{
 			URL:      entry,
 			Size:     contentLength,
-			MimeType: mime,
+			MimeType: mimeType,
 			ModTime:  modTime,
 		})
 
