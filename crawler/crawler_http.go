@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/temoto/robotstxt"
@@ -28,6 +29,16 @@ func pathDepth(filePath string) int {
 	}
 
 	return len(strings.Split(cleanPath, "/"))
+}
+
+func HttpGetUnsafe(reqUrl string) (resp *http.Response, err error) {
+	tr := http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: &tr}
+	return client.Get(reqUrl)
 }
 
 type HttpCrawlerConfig struct {
@@ -85,7 +96,7 @@ func CreateHttpCrawler(rawConfig *json.RawMessage) (crawler *HttpCrawler, err er
 		robotsURL = *entry
 		robotsURL.Path = "/robots.txt"
 
-		robotsRes, robotsErr := http.Get(robotsURL.String())
+		robotsRes, robotsErr := HttpGetUnsafe(robotsURL.String())
 		if robotsErr == nil {
 			defer robotsRes.Body.Close()
 
@@ -120,7 +131,7 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 	// 1. Save a request as otherwise we would have to create one HEAD request
 	//    before every GET to check for the content type and content length
 	// 2. Work around broken HEAD implementations
-	resp, err := http.Get(entryStr)
+	resp, err := HttpGetUnsafe(entryStr)
 	if err != nil {
 		return
 	}
@@ -158,7 +169,7 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 		fn(entryStr, FileInfo{
 			URL:      entry,
 			Size:     contentLength,
-			MimeType: resp.Header.Get("Content-Type"),
+			MimeType: mime,
 			ModTime:  modTime,
 		})
 
@@ -207,9 +218,13 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 							break
 						}
 
-						// Stop if the path depth is decreasing
-						// TODO what happens at . and ..
+						// Ignore if the path depth is decreasing (e.g. href is .. )
 						if pathDepth(nextUrl.Path) < pathDepth(entry.Path) {
+							break
+						}
+
+						// Ignore if the url is not changing (e.g. href is . )
+						if nextUrl.String() == entry.String() {
 							break
 						}
 
