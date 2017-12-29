@@ -236,7 +236,7 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 
 						// Ignore Apache dir list sort links
 						var match bool
-						match, err = regexp.MatchString("^C=(.*);O=(.*)$", nextUrl.RawQuery)
+						match, err = regexp.MatchString("^C=(.*)(&|;)O=(.*)$", nextUrl.RawQuery)
 						if match || err != nil {
 							break
 						}
