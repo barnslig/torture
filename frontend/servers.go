@@ -67,9 +67,11 @@ func (servers *Servers) Handler(w http.ResponseWriter, r *http.Request, params h
 	format := r.FormValue("format")
 
 	query := hash{
+		"size": 0,
 		"aggs": hash{
 			"by_url": hash{
 				"terms": hash{
+					"size": 2147483647,
 					"field": "Servers.Url",
 				},
 				"aggs": hash{
