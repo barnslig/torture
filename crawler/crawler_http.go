@@ -8,9 +8,11 @@ import (
 	"golang.org/x/net/html"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +20,14 @@ import (
 
 // Get the depth of a file path
 func pathDepth(filePath string) int {
-	return len(strings.Split(strings.Trim(path.Clean(filePath), "/"), "/"))
+	cleanPath := strings.Trim(path.Clean(filePath), "/")
+
+	// Special case: / should have length 0
+	if cleanPath == "" {
+		return 0
+	}
+
+	return len(strings.Split(cleanPath, "/"))
 }
 
 type HttpCrawlerConfig struct {
@@ -130,7 +139,12 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 	// We only continue walking on Content-Type: text/html files and call the
 	// WalkFunction on all other files
 	// TODO implement fallback mime sniffing (magic numbers parsing)
-	if resp.Header.Get("Content-Type") != "text/html" {
+	mime, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	if err != nil {
+		return
+	}
+
+	if mime != "text/html" {
 		var modTime time.Time
 		lastModified := resp.Header.Get("Last-Modified")
 		if lastModified != "" {
@@ -203,6 +217,13 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 						if pathDepth(nextUrl.Path) > crawler.Config.MaxPathDepth {
 							err = fmt.Errorf("MaxPathDepth exceeded")
 							return
+						}
+
+						// Ignore Apache dir list sort links
+						var match bool
+						match, err = regexp.MatchString("^C=(.*);O=(.*)$", nextUrl.RawQuery)
+						if match || err != nil {
+							break
 						}
 
 						// Errors are bubbled up
