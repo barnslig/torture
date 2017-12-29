@@ -56,8 +56,8 @@ func CreateHttpCrawler(rawConfig *json.RawMessage) (crawler *HttpCrawler, err er
 		// Share an http.Client so we can keep alive connections
 		HttpClient: &http.Client{
 			Transport: &http.Transport{
+				MaxIdleConnsPerHost: 1024,
 				TLSClientConfig: &tls.Config{
-					MaxIdleConnsPerHost: 1024,
 					InsecureSkipVerify: true,
 				},
 			},
