@@ -19,6 +19,16 @@ Dependencies are managed using [dep](https://github.com/golang/dep).
 ### Frontend
 1. Run the frontend
 
+### Docker
+Setting up elasticsearch, crawler and frontend is significantly easier using Docker:
+
+	cp crawler/config.json .
+	docker-compose up -d
+
+Reload the crawler's config:
+
+	docker-compose kill -s USR1 crawler
+
 ## Authors
 See [AUTHORS](AUTHORS). Do not forget to add yourself!
 

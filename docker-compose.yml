@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  elasticsearch:
+    image: elasticsearch:5.6-alpine
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+  crawler:
+    build: ./crawler
+    volumes:
+      - ./config.json:/root/config.json
+    depends_on:
+      - elasticsearch
+  frontend:
+    build: ./frontend
+    ports:
+      - 8080:8080
+    depends_on:
+      - elasticsearch
+
+volumes:
+  esdata:
+    driver: local

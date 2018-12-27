@@ -141,8 +141,6 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 		return
 	}
 
-	defer resp.Body.Close()
-
 	// Determine the content length in bytes
 	var contentLength int64
 	if len(resp.Header.Get("Content-Length")) > 0 {
@@ -187,6 +185,8 @@ func (crawler *HttpCrawler) walker(entry *url.URL, fn WalkFunction) (err error) 
 	if err != nil {
 		return
 	}
+
+	resp.Body.Close()
 
 	if int64(len(body)) < contentLength {
 		err = fmt.Errorf("BodySizeLimit exceeded")

@@ -85,7 +85,7 @@ func CreateModel(host string) (model *Model, err error) {
 	})
 
 	// Ignore index_already_exists_exception
-	if err != nil && err.Error() == "resource_already_exists_exception" {
+	if err != nil && err.Error() == "index_already_exists_exception" {
 		err = nil
 	}
 
