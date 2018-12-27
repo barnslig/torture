@@ -14,7 +14,7 @@ This nearly complete rewrite of the old bot has some nice new features:
 3. `go build`
 4. `./crawler`
 
-Dependencies are managed using [govendor](https://github.com/kardianos/govendor).
+Dependencies are managed using [dep](https://github.com/golang/dep).
 
 ## Implementing new protocols
 
